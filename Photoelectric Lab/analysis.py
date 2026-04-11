@@ -9,17 +9,17 @@ from Dataprocessing import process_all_data
 # choose the linear fit region for each wavelength (index range for plots)
 #fill in the parenthesis with the values we want for the plots
 fit_ranges = {
-    "1700A": (),
-    "1800A": (),
-    "1900A": (),
-    "2000A": (),
-    "2100A": (),
-    "2200A": (),
-    "2300A": (),
-    "2400A": (),
-    "2500A": (),
-    "2600A": (),
-    "2700A": ()
+    "1700A": (200, 700),
+    "1800A": (200, 700),
+    "1900A": (200, 700),
+    "2000A": (200, 700),
+    "2100A": (200, 700),
+    "2200A": (200, 700),
+    "2300A": (200, 700),
+    "2400A": (200, 700),
+    "2500A": (200, 700),
+    "2600A": (200, 700),
+    "2700A": (200, 700)
 
 }
 
@@ -62,6 +62,38 @@ def compute_stopping_voltage(a, b, sigma_a, sigma_b):
 
 # runs the analysis for every wavelength
 def analyze_all_data():
+    i_back_avg, sigma_back, datasets = process_all_data()
+
+    results = []
+
+    for key in sorted(datasets.keys(), key=lambda x: int(x[:-1])):
+        data = datasets[key]
+
+        if key not in fit_ranges:
+            print(f"Skipping {key} because no fit range was given.")
+            continue
+
+        start, stop = fit_ranges[key]
+
+        vr = data["Vr"][start:stop]
+        i_photo = data["I_photo"][start:stop]
+        sigma_photo = data["sigma_photo"][start:stop]
+
+        a, b, sigma_a, sigma_b = weighted_least_squares(vr, i_photo, sigma_photo)
+        vs, sigma_vs = compute_stopping_voltage(a, b, sigma_a, sigma_b)
+
+        results.append({
+            "wavelength_A": data["meta"]["wavelength_A"],
+            "frequency_Hz": data["meta"]["frequency_Hz"],
+            "a": a,
+            "b": b,
+            "sigma_a": sigma_a,
+            "sigma_b": sigma_b,
+            "Vs": vs,
+            "sigma_Vs": sigma_vs
+        })
+
+    return results
 
 
 
@@ -72,3 +104,20 @@ def analyze_all_data():
 # prints all fit values
 def main():
     results = analyze_all_data()
+
+    print("Analysis results")
+
+    for item in results:
+        print(
+            f"{int(item['wavelength_A']):>4}A | "
+            f"a = {item['a']:.6e} | "
+            f"b = {item['b']:.6e} | "
+            f"sigma_a = {item['sigma_a']:.6e} | "
+            f"sigma_b = {item['sigma_b']:.6e} | "
+            f"Vs = {item['Vs']:.6f} V | "
+            f"sigma_Vs = {item['sigma_Vs']:.6f} V"
+        )
+
+
+if __name__ == "__main__":
+    main()
