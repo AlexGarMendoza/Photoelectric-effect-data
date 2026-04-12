@@ -50,7 +50,7 @@ def load_photoelectric_file(filename):
                     try:
                         vr = float(parts[0])
                         i_total = float(parts[1])
-                        sigma_i = float(parts[2])
+                        sigma_i = float(parts[2]) / np.sqrt(100)
                         rows.append([vr, i_total, sigma_i])
                     except ValueError:
                         pass
@@ -81,7 +81,7 @@ def compute_background(filename):
 
 # loads all wavelength files
 # then makes I_photo and sigma_photo for each one
-def average_by_voltage(vr, i_total):
+def average_by_voltage(vr, i_total, sigma_i):
     vr_rounded = np.round(vr, 5)
     unique_vr = np.unique(vr_rounded)
 
@@ -92,6 +92,7 @@ def average_by_voltage(vr, i_total):
     for value in unique_vr:
         mask = vr_rounded == value
         currents = i_total[mask]
+        sigmas = sigma_i[mask]
 
         vr_avg.append(value)
         i_total_avg.append(np.mean(currents))
@@ -99,7 +100,7 @@ def average_by_voltage(vr, i_total):
         if len(currents) > 1:
             sigma_total.append(np.std(currents, ddof=1))
         else:
-            sigma_total.append(0.0)
+            sigma_total.append(sigmas[0])
 
     return (
         np.array(vr_avg, dtype=float),
@@ -121,7 +122,8 @@ def process_all_data():
 
         vr_avg, i_total_avg, sigma_total = average_by_voltage(
             file_data["Vr"],
-            file_data["I_total"]
+            file_data["I_total"],
+            file_data["sigma_I"]
         )
 
         file_data["Vr"] = vr_avg

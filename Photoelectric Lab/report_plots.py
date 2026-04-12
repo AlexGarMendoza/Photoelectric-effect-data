@@ -32,21 +32,25 @@ def plot_photocurrent_curve(wavelength_key, filename):
     a, b, sigma_a, sigma_b = weighted_least_squares(x_fit, y_fit, sigma_fit)
     vs = -a / b
 
-    # line for the fit
+    # line covers the fit region only
     x_line = np.linspace(x_fit.min(), x_fit.max(), 200)
     y_line = a + b * x_line
 
+    # subsample for display only — fit uses the full dataset
+    step = 10
     plt.figure()
     plt.errorbar(
-        vr,
-        i_photo,
-        yerr=sigma_photo,
+        vr[::step],
+        i_photo[::step],
+        yerr=sigma_photo[::step],
         fmt='o',
         markersize=3,
+        markerfacecolor='black',
+        markeredgecolor='black',
         capsize=2,
         label="Data"
     )
-    plt.plot(x_line, y_line, label="Weighted fit")
+    plt.plot(x_line, y_line, label="Weighted fit", zorder=5)
 
     plt.xlabel("Retarding Voltage (V)")
     plt.ylabel("Photocurrent (A)")
@@ -86,7 +90,7 @@ def plot_final_fit(filename):
         capsize=3,
         label="Data"
     )
-    plt.plot(x_line, y_line, label="Weighted fit")
+    plt.plot(x_line, y_line, label="Weighted fit", zorder=5)
 
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Stopping Voltage (V)")
