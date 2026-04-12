@@ -81,6 +81,31 @@ def compute_background(filename):
 
 # loads all wavelength files
 # then makes I_photo and sigma_photo for each one
+def average_by_voltage(vr, i_total):
+    vr_rounded = np.round(vr, 5)
+    unique_vr = np.unique(vr_rounded)
+
+    vr_avg = []
+    i_total_avg = []
+    sigma_total = []
+
+    for value in unique_vr:
+        mask = vr_rounded == value
+        currents = i_total[mask]
+
+        vr_avg.append(value)
+        i_total_avg.append(np.mean(currents))
+
+        if len(currents) > 1:
+            sigma_total.append(np.std(currents, ddof=1))
+        else:
+            sigma_total.append(0.0)
+
+    return (
+        np.array(vr_avg, dtype=float),
+        np.array(i_total_avg, dtype=float),
+        np.array(sigma_total, dtype=float)
+    )
 
 def process_all_data():
     background_file = "Background current secondary.txt"
@@ -94,6 +119,15 @@ def process_all_data():
     for path in sorted(Path(".").glob("main *A.txt")):
         file_data = load_photoelectric_file(path)
 
+        vr_avg, i_total_avg, sigma_total = average_by_voltage(
+            file_data["Vr"],
+            file_data["I_total"]
+        )
+
+        file_data["Vr"] = vr_avg
+        file_data["I_total"] = i_total_avg
+        file_data["sigma_I"] = sigma_total
+
         # subtract background current
         file_data["I_photo"] = file_data["I_total"] - i_back_avg
 
@@ -105,8 +139,6 @@ def process_all_data():
         datasets[key] = file_data
 
     return i_back_avg, sigma_back, datasets
-
-
 # main part
 # just prints out what got loaded so we can check it
 def main():

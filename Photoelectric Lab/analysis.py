@@ -9,18 +9,17 @@ from Dataprocessing import process_all_data
 # choose the linear fit region for each wavelength (index range for plots)
 #fill in the parenthesis with the values we want for the plots
 fit_ranges = {
-    "1700A": (200, 700),
-    "1800A": (200, 700),
-    "1900A": (200, 700),
-    "2000A": (200, 700),
-    "2100A": (200, 700),
-    "2200A": (200, 700),
-    "2300A": (200, 700),
-    "2400A": (200, 700),
-    "2500A": (200, 700),
-    "2600A": (200, 700),
-    "2700A": (200, 700)
-
+    "1700A": (150, 500),
+    "1800A": (150, 500),
+    "1900A": (150, 500),
+    "2000A": (150, 500),
+    "2100A": (150, 500),
+    "2200A": (150, 500),
+    "2300A": (150, 500),
+    "2400A": (150, 500),
+    "2500A": (120, 450),
+    "2600A": (100, 400),
+    "2700A": (80, 350)
 }
 
 # weighted least squares fit by hand
@@ -97,9 +96,6 @@ def analyze_all_data():
 
 
 
-
-
-
 # main part
 # prints all fit values
 def main():
@@ -118,6 +114,36 @@ def main():
             f"sigma_Vs = {item['sigma_Vs']:.6f} V"
         )
 
+def save_analysis_to_csv(filename="analysis_results.csv"):
+    results = analyze_all_data()
+
+    data = []
+
+    for item in results:
+        data.append([
+            item["wavelength_A"],
+            item["frequency_Hz"],
+            item["a"],
+            item["b"],
+            item["sigma_a"],
+            item["sigma_b"],
+            item["Vs"],
+            item["sigma_Vs"]
+        ])
+
+    data = np.array(data)
+
+    np.savetxt(
+        filename,
+        data,
+        delimiter=",",
+        header="wavelength_A,frequency_Hz,a,b,sigma_a,sigma_b,Vs,sigma_Vs",
+        comments=""
+    )
+
+    print(f"Saved {filename}")
+   
 
 if __name__ == "__main__":
     main()
+    save_analysis_to_csv()
