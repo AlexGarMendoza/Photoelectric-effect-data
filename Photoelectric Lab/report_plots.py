@@ -43,14 +43,18 @@ def plot_photocurrent_curve(wavelength_key, filename):
         vr[::step],
         i_photo[::step],
         yerr=sigma_photo[::step],
-        fmt='o',
+        fmt='s',
         markersize=3,
-        markerfacecolor='black',
+        markerfacecolor='none',
         markeredgecolor='black',
+        markeredgewidth=0.5,
         capsize=2,
+        elinewidth=0.6,
+        capthick=0.4,
+        ecolor='crimson',
         label="Data"
     )
-    plt.plot(x_line, y_line, label="Weighted fit", zorder=5)
+    plt.plot(x_line, y_line, color='black', linewidth=0.8, label="Weighted fit", zorder=5)
 
     eq = f"I = {b:.2e} · Vr + {a:.2e}\nVs = {vs:.4f} V"
     plt.text(0.97, 0.97, eq, transform=plt.gca().transAxes,
@@ -64,10 +68,11 @@ def plot_photocurrent_curve(wavelength_key, filename):
     plt.grid(True)
     plt.tight_layout()
 
-    plt.savefig(filename)
+    base = filename.rsplit('.', 1)[0]
+    plt.savefig(base + '.svg')
     plt.close()
 
-    print(f"Saved {filename}")
+    print(f"Saved {base}.svg")
 
 
 # makes the final stopping voltage vs frequency plot
@@ -90,31 +95,41 @@ def plot_final_fit(filename):
         frequency,
         vs,
         yerr=sigma_vs,
-        fmt='o',
-        markersize=4,
+        fmt='s',
+        markersize=5,
+        markerfacecolor='none',
+        markeredgecolor='black',
+        markeredgewidth=0.5,
         capsize=3,
+        elinewidth=0.6,
+        capthick=0.4,
+        ecolor='crimson',
         label="Data"
     )
-    plt.plot(x_line, y_line, label="Weighted fit", zorder=5)
+    plt.plot(x_line, y_line, color='black', linewidth=0.8, label="Weighted fit", zorder=5)
 
     e = 1.602176634e-19
-    phi = -e * A
-    eq = f"Vs = {B:.2e} · f + {A:.2e}\nφ = -eA = {phi:.2e} J"
-    plt.text(0.97, 0.97, eq, transform=plt.gca().transAxes,
-             fontsize=8, verticalalignment='top', horizontalalignment='right',
-             bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    phi = -A  #gives the value of phi in electron volts
+    h = e * B
+    eq = f"Vs = {B:.2e} · f + {A:.3f}\nφ = -A = {phi:.3f} eV\nh = eB = {h:.2e} J·s"
 
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Stopping Voltage (V)")
     plt.title("Stopping Voltage vs. Frequency")
-    plt.legend()
+    legend = plt.legend(loc='upper left')
+    plt.gca().figure.canvas.draw()
+    bb = legend.get_window_extent().transformed(plt.gca().transAxes.inverted())
+    plt.text(bb.x0, bb.y0 - 0.02, eq, transform=plt.gca().transAxes,
+             fontsize=8, verticalalignment='top', horizontalalignment='left',
+             bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     plt.grid(True)
     plt.tight_layout()
 
-    plt.savefig(filename)
+    base = filename.rsplit('.', 1)[0]
+    plt.savefig(base + '.svg')
     plt.close()
 
-    print(f"Saved {filename}")
+    print(f"Saved {base}.svg")
 
 
 # main
