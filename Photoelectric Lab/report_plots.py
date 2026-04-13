@@ -52,7 +52,7 @@ def plot_photocurrent_curve(wavelength_key, filename):
     )
     plt.plot(x_line, y_line, label="Weighted fit", zorder=5)
 
-    eq = f"I = {a:.2e} + {b:.2e} · Vr\nVs = {vs:.4f} V"
+    eq = f"I = {b:.2e} · Vr + {a:.2e}\nVs = {vs:.4f} V"
     plt.text(0.97, 0.97, eq, transform=plt.gca().transAxes,
              fontsize=8, verticalalignment='top', horizontalalignment='right',
              bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
@@ -96,6 +96,13 @@ def plot_final_fit(filename):
         label="Data"
     )
     plt.plot(x_line, y_line, label="Weighted fit", zorder=5)
+
+    e = 1.602176634e-19
+    phi = -e * A
+    eq = f"Vs = {B:.2e} · f + {A:.2e}\nφ = -eA = {phi:.2e} J"
+    plt.text(0.97, 0.97, eq, transform=plt.gca().transAxes,
+             fontsize=8, verticalalignment='top', horizontalalignment='right',
+             bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
 
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Stopping Voltage (V)")
