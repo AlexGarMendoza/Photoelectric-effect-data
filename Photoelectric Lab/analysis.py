@@ -10,8 +10,8 @@ from Dataprocessing import process_all_data
 #fill in the parenthesis with the values we want for the plots
 fit_ranges = {
     "1700A": (560, 955),
-    "1800A": (150, 500),
-    "1900A": (150, 500),
+    "1800A": (520, 900),
+    "1900A": (450, 850),
     "2000A": (150, 500),
     "2100A": (150, 500),
     "2200A": (615, 974),
